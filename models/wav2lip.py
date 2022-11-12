@@ -60,16 +60,16 @@ class Wav2Lip(nn.Module):
             Conv2d(512, 512, kernel_size=1, stride=1, padding=0),)
 
         self.face_decoder_blocks = nn.ModuleList([
-            nn.Sequential(Conv2d(512, 512, kernel_size=1, stride=1, padding=0),),
+            nn.Sequential(Conv2d(1024, 1024, kernel_size=1, stride=1, padding=0),),
 
-            nn.Sequential(Conv2dTranspose(1024, 512, kernel_size=3, stride=1, padding=0), # 3,3
+            nn.Sequential(Conv2dTranspose(2048, 1024, kernel_size=3, stride=1, padding=0), # 3,3
             Conv2d(512, 512, kernel_size=3, stride=1, padding=1, residual=True),),
 
-            nn.Sequential(Conv2dTranspose(1024, 512, kernel_size=3, stride=2, padding=1, output_padding=1),
+            nn.Sequential(Conv2dTranspose(2048, 1024, kernel_size=3, stride=2, padding=1, output_padding=1),
             Conv2d(512, 512, kernel_size=3, stride=1, padding=1, residual=True),
             Conv2d(512, 512, kernel_size=3, stride=1, padding=1, residual=True),), # 6, 6
 
-            nn.Sequential(Conv2dTranspose(768, 384, kernel_size=3, stride=2, padding=1, output_padding=1),
+            nn.Sequential(Conv2dTranspose(1024, 512, kernel_size=3, stride=2, padding=1, output_padding=1),
             Conv2d(384, 384, kernel_size=3, stride=1, padding=1, residual=True),
             Conv2d(384, 384, kernel_size=3, stride=1, padding=1, residual=True),), # 12, 12
 
@@ -77,21 +77,21 @@ class Wav2Lip(nn.Module):
             Conv2d(256, 256, kernel_size=3, stride=1, padding=1, residual=True),
             Conv2d(256, 256, kernel_size=3, stride=1, padding=1, residual=True),), # 24, 24
 
-            nn.Sequential(Conv2dTranspose(320, 128, kernel_size=3, stride=2, padding=1, output_padding=1), 
+            nn.Sequential(Conv2dTranspose(256, 128, kernel_size=3, stride=2, padding=1, output_padding=1), 
             Conv2d(128, 128, kernel_size=3, stride=1, padding=1, residual=True),
             Conv2d(128, 128, kernel_size=3, stride=1, padding=1, residual=True),), # 48, 48
 
-            nn.Sequential(Conv2dTranspose(160, 64, kernel_size=3, stride=2, padding=1, output_padding=1),
+            nn.Sequential(Conv2dTranspose(128, 64, kernel_size=3, stride=2, padding=1, output_padding=1),
             Conv2d(64, 64, kernel_size=3, stride=1, padding=1, residual=True),
             Conv2d(64, 64, kernel_size=3, stride=1, padding=1, residual=True),),  # 96,96
             
-            nn.Sequential(Conv2dTranspose(80, 32, kernel_size=3, stride=2, padding=1, output_padding=1),
+            nn.Sequential(Conv2dTranspose(64, 32, kernel_size=3, stride=2, padding=1, output_padding=1),
             Conv2d(32, 32, kernel_size=3, stride=1, padding=1, residual=True),
             Conv2d(32, 32, kernel_size=3, stride=1, padding=1, residual=True),), # 192, 192
             
             ]) 
 
-        self.output_block = nn.Sequential(Conv2d(40, 16, kernel_size=3, stride=1, padding=1),
+        self.output_block = nn.Sequential(Conv2d(32, 16, kernel_size=3, stride=1, padding=1),
             nn.Conv2d(16, 3, kernel_size=1, stride=1, padding=0),
             nn.Sigmoid()) 
 
@@ -163,7 +163,7 @@ class Wav2Lip_disc_qual(nn.Module):
             nn.Sequential(nonorm_Conv2d(1024, 1024, kernel_size=3, stride=1, padding=0),     # 1, 1
             nonorm_Conv2d(1024, 1024, kernel_size=1, stride=1, padding=0)),])
 
-        self.binary_pred = nn.Sequential(nn.Conv2d(512, 1, kernel_size=1, stride=1, padding=0), nn.Sigmoid())
+        self.binary_pred = nn.Sequential(nn.Conv2d(1024, 1, kernel_size=1, stride=1, padding=0), nn.Sigmoid())
         self.label_noise = .0
 
     def get_lower_half(self, face_sequences):
