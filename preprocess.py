@@ -1,13 +1,15 @@
 import sys
+import os
+import zipfile
 
 if sys.version_info[0] < 3 and sys.version_info[1] < 2:
 	raise Exception("Must be using >= Python 3.2")
 
 from os import listdir, path
 
-if not path.isfile('face_detection/detection/sfd/s3fd.pth'):
-	raise FileNotFoundError('Save the s3fd model to face_detection/detection/sfd/s3fd.pth \
-							before running this script!')
+# if not path.isfile('face_detection/detection/sfd/s3fd.pth'):
+# 	raise FileNotFoundError('Save the s3fd model to face_detection/detection/sfd/s3fd.pth \
+# 							before running this script!')
 
 import multiprocessing as mp
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -36,6 +38,10 @@ template = 'ffmpeg -loglevel panic -y -i {} -strict -2 {}'
 # template2 = 'ffmpeg -hide_banner -loglevel panic -threads 1 -y -i {} -async 1 -ac 1 -vn -acodec pcm_s16le -ar 16000 {}'
 
 def process_video_file(vfile, args, gpu_id):
+	archive = zipfile.ZipFile(args.data_root, 'r')
+	print(vfile)
+	vfile = archive.open(vfile)
+	print(vfile)
 	video_stream = cv2.VideoCapture(vfile)
 	
 	frames = []
@@ -91,8 +97,12 @@ def mp_handler(job):
 def main(args):
 	print('Started processing for {} with {} GPUs'.format(args.data_root, args.ngpu))
 
-	filelist = glob(path.join(args.data_root, '*/*.mp4'))
-
+	filelist = []
+	with zipfile.ZipFile(args.data_root) as z:
+		for filename in z.namelist():
+			if(".mp4" in filename):
+				filelist.append(filename)          
+	
 	jobs = [(vfile, args, i%args.ngpu) for i, vfile in enumerate(filelist)]
 	p = ThreadPoolExecutor(args.ngpu)
 	futures = [p.submit(mp_handler, j) for j in jobs]
@@ -101,6 +111,7 @@ def main(args):
 	print('Dumping audios...')
 
 	for vfile in tqdm(filelist):
+		print(vfile)
 		try:
 			process_audio_file(vfile, args)
 		except KeyboardInterrupt:
