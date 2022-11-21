@@ -62,7 +62,9 @@ def process_video_file(vfile, args, gpu_id):
 			i += 1
 			if f is None:
 				continue
-
+			if(path.isfile(path.join(fulldir, '{}.jpg'.format(i)))):
+				print("file exist")
+				continue
 			x1, y1, x2, y2 = f
 			cv2.imwrite(path.join(fulldir, '{}.jpg'.format(i)), fb[j][y1:y2, x1:x2])
 

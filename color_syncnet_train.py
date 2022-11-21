@@ -70,7 +70,8 @@ class Dataset(object):
         while 1:
             idx = random.randint(0, len(self.all_videos) - 1)
             vidname = self.all_videos[idx]
-
+            vidname = vidname.split(".mp4")[0]
+            print(vidname)
             img_names = list(glob(join(vidname, '*.jpg')))
             if len(img_names) <= 3 * syncnet_T:
                 continue
