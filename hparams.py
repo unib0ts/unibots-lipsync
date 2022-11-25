@@ -73,19 +73,19 @@ hparams = HParams(
 	fmax=7600,  # To be increased/reduced depending on data.
 
 	###################### Our training parameters #################################
-	img_size=192,
+	img_size=96,
 	fps=25,
 	
 	batch_size=16,
 	initial_learning_rate=1e-4,
 	nepochs=200000000000000000,  ### ctrl + c, stop whenever eval loss is consistently greater than train loss for ~10 epochs
-	num_workers=16,
+	num_workers=12,
 	checkpoint_interval=3000,
 	eval_interval=3000,
     save_optimizer_state=True,
 
     syncnet_wt=0.0, # is initially zero, will be set automatically to 0.03 later. Leads to faster convergence. 
-	syncnet_batch_size=64,
+	syncnet_batch_size=128,
 	syncnet_lr=5e-5,
 	syncnet_eval_interval=10000,
 	syncnet_checkpoint_interval=10000,

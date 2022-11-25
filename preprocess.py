@@ -51,7 +51,11 @@ def process_video_file(vfile, args, gpu_id):
 
 	fulldir = path.join(args.preprocessed_root, dirname, vidname)
 	os.makedirs(fulldir, exist_ok=True)
-
+	imgs = list(glob(join(vidname, '*.jpg')))
+	if len(imgs) > 0:
+		print("returned")
+		return 0
+	print("imgs not found, processing")
 	batches = [frames[i:i + args.batch_size] for i in range(0, len(frames), args.batch_size)]
 
 	i = -1
@@ -76,7 +80,8 @@ def process_audio_file(vfile, args):
 	os.makedirs(fulldir, exist_ok=True)
 
 	wavpath = path.join(fulldir, 'audio.wav')
-
+	if path.isfile(wavpath):
+		return 0
 	command = template.format(vfile, wavpath)
 	subprocess.call(command, shell=True)
 
@@ -95,14 +100,23 @@ def main(args):
 
 	filelist = glob(path.join(args.data_root, '*/*.mp4'))
 
-	jobs = [(vfile, args, i%args.ngpu) for i, vfile in enumerate(filelist)]
-	p = ThreadPoolExecutor(args.ngpu)
-	futures = [p.submit(mp_handler, j) for j in jobs]
-	_ = [r.result() for r in tqdm(as_completed(futures), total=len(futures))]
+	# jobs = [(vfile, args, i%args.ngpu) for i, vfile in enumerate(filelist)]
+	# p = ThreadPoolExecutor(args.ngpu)
+	# futures = [p.submit(mp_handler, j) for j in jobs]
+	# _ = [r.result() for r in tqdm(as_completed(futures), total=len(futures))]
 
 	print('Dumping audios...')
-
+	for i, vfile in enumerate(filelist):
+		print(i)
+		mp_handler(vfile, args, i%args.ngpu)
 	for vfile in tqdm(filelist):
+		vidname = os.path.basename(vfile).split('.')[0]
+		dirname = vfile.split('/')[-2]
+
+		fulldir = path.join(args.preprocessed_root, dirname, vidname)
+		wavpath = path.join(fulldir, 'audio.wav')
+		if path.isfile(wavpath):
+			continue
 		try:
 			process_audio_file(vfile, args)
 		except KeyboardInterrupt:
